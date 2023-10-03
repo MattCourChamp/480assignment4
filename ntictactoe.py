@@ -1,7 +1,7 @@
 # ntictactoe.py
 # For CSI 480 @ Champlain College
 # Starter Code by David Kopec
-# Completed by:
+# Completed by: Matthew Cournoyer
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,6 +53,67 @@ class NTTTBoard(Board[NTTTMove]):
     # Think about what changes in numerical and what you have been provided
     # Note that several of the related types have changed from the TTTBoard
     # YOUR CODE HERE
+
+    @property
+    def turn(self) -> NTTTPlayer:
+        """Returns the current player"""
+        return self._turn
+
+    def make_move(self, move: NTTTMove) -> NTTTBoard:
+        """Returns a copy of the board with the new move"""
+        temp_position = self.position.copy()
+        temp_position[move.square] = move.piece
+        return NTTTBoard(temp_position, self.turn.opposite)
+
+    @property
+    def legal_moves(self) -> list[NTTTMove]:
+        """Returns a list of possible moves"""
+        # the commented out stuff is an alternate writing that works the same
+        played_nums = set(self.position)
+        possible_moves: [NTTTMove] = []
+        if self._turn == NTTTPlayer.Even:
+            return [NTTTMove(s, p) for s in range(len(self.position)) for p in self.EVENS if self.position[s] == 0 and not played_nums.__contains__(p)]
+            # for s in range(len(self.position)):
+            #     if self.position[s] == 0:
+            #         for p in self.EVENS:
+            #             if not played_nums.__contains__(p):
+            #                 possible_moves.append(NTTTMove(s, p))
+            # return possible_moves
+        else:
+            return [NTTTMove(s, p) for s in range(len(self.position)) for p in self.ODDS if self.position[s] == 0 and not played_nums.__contains__(p)]
+            # for s in range(len(self.position)):
+            #     if self.position[s] == 0:
+            #         for p in self.ODDS:
+            #             if not played_nums.__contains__(p):
+            #                 possible_moves.append(NTTTMove(s, p))
+            # return possible_moves
+
+    @property
+    def is_win(self) -> bool:
+        """Is there a 15 in any row, column, or diagonal"""
+        # i think the only way to do this is to have a bunch of ifs for each individual group of 3
+        # first the rows, then columns, then diagonals
+        return (self.position[0] + self.position[1] + self.position[2] == 15) or \
+               (self.position[3] + self.position[4] + self.position[5] == 15) or \
+               (self.position[6] + self.position[7] + self.position[8] == 15) or \
+               (self.position[0] + self.position[3] + self.position[6] == 15) or \
+               (self.position[1] + self.position[4] + self.position[7] == 15) or \
+               (self.position[2] + self.position[5] + self.position[8] == 15) or \
+               (self.position[0] + self.position[4] + self.position[8] == 15) or \
+               (self.position[2] + self.position[4] + self.position[6] == 15)
+
+    @property
+    def is_draw(self) -> bool:
+        return (not self.is_win) and (len(self.legal_moves) == 0)
+
+    def evaluate(self, player: NTTTPlayer) -> float:
+        """Checks if the board wins, loses, or ties. Is only ran when the board is full or someone wins."""
+        if self.is_win and self.turn == player:
+            return -1
+        elif self.is_win and self.turn != player:
+            return 1
+        else:
+            return 0
 
     def __repr__(self) -> str:
         nice_version = [str(p) if p != 0 else " " for p in self.position]
