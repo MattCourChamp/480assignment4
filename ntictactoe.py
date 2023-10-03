@@ -68,39 +68,24 @@ class NTTTBoard(Board[NTTTMove]):
     @property
     def legal_moves(self) -> list[NTTTMove]:
         """Returns a list of possible moves"""
-        # the commented out stuff is an alternate writing that works the same
         played_nums = set(self.position)
-        possible_moves: [NTTTMove] = []
         if self._turn == NTTTPlayer.Even:
             return [NTTTMove(s, p) for s in range(len(self.position)) for p in self.EVENS if self.position[s] == 0 and not played_nums.__contains__(p)]
-            # for s in range(len(self.position)):
-            #     if self.position[s] == 0:
-            #         for p in self.EVENS:
-            #             if not played_nums.__contains__(p):
-            #                 possible_moves.append(NTTTMove(s, p))
-            # return possible_moves
         else:
             return [NTTTMove(s, p) for s in range(len(self.position)) for p in self.ODDS if self.position[s] == 0 and not played_nums.__contains__(p)]
-            # for s in range(len(self.position)):
-            #     if self.position[s] == 0:
-            #         for p in self.ODDS:
-            #             if not played_nums.__contains__(p):
-            #                 possible_moves.append(NTTTMove(s, p))
-            # return possible_moves
+
 
     @property
     def is_win(self) -> bool:
-        """Is there a 15 in any row, column, or diagonal"""
-        # i think the only way to do this is to have a bunch of ifs for each individual group of 3
-        # first the rows, then columns, then diagonals
-        return (self.position[0] + self.position[1] + self.position[2] == 15) or \
-               (self.position[3] + self.position[4] + self.position[5] == 15) or \
-               (self.position[6] + self.position[7] + self.position[8] == 15) or \
-               (self.position[0] + self.position[3] + self.position[6] == 15) or \
-               (self.position[1] + self.position[4] + self.position[7] == 15) or \
-               (self.position[2] + self.position[5] + self.position[8] == 15) or \
-               (self.position[0] + self.position[4] + self.position[8] == 15) or \
-               (self.position[2] + self.position[4] + self.position[6] == 15)
+        """Is there a 15 in any row, column, or diagonal, also makes sure there are no zeroes in a winning trio"""
+        return (self.position[0] + self.position[1] + self.position[2] == 15 and (self.position[0] != 0 and self.position[1] != 0 and self.position[2] != 0)) or \
+               (self.position[3] + self.position[4] + self.position[5] == 15 and (self.position[3] != 0 and self.position[4] != 0 and self.position[5] != 0)) or \
+               (self.position[6] + self.position[7] + self.position[8] == 15 and (self.position[6] != 0 and self.position[7] != 0 and self.position[8] != 0)) or \
+               (self.position[0] + self.position[3] + self.position[6] == 15 and (self.position[0] != 0 and self.position[3] != 0 and self.position[6] != 0)) or \
+               (self.position[1] + self.position[4] + self.position[7] == 15 and (self.position[1] != 0 and self.position[4] != 0 and self.position[7] != 0)) or \
+               (self.position[2] + self.position[5] + self.position[8] == 15 and (self.position[2] != 0 and self.position[5] != 0 and self.position[8] != 0)) or \
+               (self.position[0] + self.position[4] + self.position[8] == 15 and (self.position[0] != 0 and self.position[4] != 0 and self.position[8] != 0)) or \
+               (self.position[2] + self.position[4] + self.position[6] == 15 and (self.position[2] != 0 and self.position[4] != 0 and self.position[6] != 0))
 
     @property
     def is_draw(self) -> bool:
@@ -108,9 +93,9 @@ class NTTTBoard(Board[NTTTMove]):
 
     def evaluate(self, player: NTTTPlayer) -> float:
         """Checks if the board wins, loses, or ties. Is only ran when the board is full or someone wins."""
-        if self.is_win and self.turn == player:
+        if self.is_win and self._turn == player:
             return -1
-        elif self.is_win and self.turn != player:
+        elif self.is_win and self._turn != player:
             return 1
         else:
             return 0
